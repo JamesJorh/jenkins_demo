@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    environment {
+        // 定义环境变量
+        TestMachine = 'Test-Machine-001'
+        Bay = 'Bay-01'
+        Branch = 'main'
+        PackagePath = '/path/to/package'
+        IsoPath = '/path/to/iso'
+        Version = 'v1.0.0'
+    }
+
+    stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    // 使用 wrap([$class: 'BuildUser']) 来识别用户信息
+                    wrap([$class: 'BuildUser']) {
+                        // 设置构建名称为 [Version] + [Branch]
+                        currentBuild.displayName = "${env.Version} - ${env.Branch}"
+
+                        // 添加徽章 (使用 addShortText 代替 addBadge)
+                        addShortTextLabels()
+                    }
+                }
+            }
+        }
+
+        // 其他阶段...
+    }
+}
+
+// 使用 addShortText 来实现带有边框和放大的文本徽章
+def addShortTextLabels() {
+    try {
+        addShortText(text: "Test Machine: ${env.TestMachine}", background: "white", color: "black", border: 3, borderColor: "blue", fontSize: 20)
+        addShortText(text: "Bay: ${env.Bay}", background: "white", color: "black", border: 3, borderColor: "green", fontSize: 20)
+        addShortText(text: "Branch: ${env.Branch}", background: "white", color: "black", border: 3, borderColor: "red", fontSize: 20)
+        addShortText(text: "Package Path", background: "white", color: "black", border: 3, borderColor: "yellow", fontSize: 26)
+        addShortText(text: "${env.PackagePath}", background: "white", color: "black", border: 3, borderColor: "yellow", fontSize: 16)
+        addShortText(text: "ISO Path", background: "white", color: "black", border: 3, borderColor: "purple", fontSize: 16)
+        addShortText(text: "${env.IsoPath}", background: "white", color: "black", border: 3, borderColor: "purple", fontSize: 16)
+        addShortText(text: "Version: ${env.Version}", background: "white", color: "black", border: 3, borderColor: "orange", fontSize: 20)
+        addShortText(text: "User: ${env.BUILD_USER}", background: "white", color: "black", border: 3, borderColor: "pink", fontSize: 20)
+        addShortText(text: "User ID: ${env.BUILD_USER_ID}", background: "white", color: "black", border: 3, borderColor: "pink", fontSize: 16)
+        addShortText(text: "User Email: ${env.BUILD_USER_EMAIL}", background: "white", color: "black", border: 3, borderColor: "pink", fontSize: 16)
+        addShortText(text: "User First Name: ${env.BUILD_USER_FIRST_NAME}", background: "white", color: "black", border: 3, borderColor: "pink", fontSize: 16)
+        addShortText(text: "User Last Name: ${env.BUILD_USER_LAST_NAME}", background: "white", color: "black", border: 3, borderColor: "pink", fontSize: 16)
+    } catch (Exception e) {
+        echo "Error adding short text: ${e.message}"
+    }
+}
+
+def getBuildUser() {
+    // 获取构建者信息
+    return env.BUILD_USER ?: 'Unknown User'
+}
